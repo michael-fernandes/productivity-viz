@@ -80,7 +80,7 @@ class Cabinet extends Component {
     let pomodoros = this.state.pomodoros;
     let remove = 1000000;
     for(let i =0; i < pomodoros.length; i++){
-      if(pomodoros[i].key == key){
+      if(pomodoros[i].key === key){
         remove = i;
       }
     }
@@ -94,7 +94,7 @@ class Cabinet extends Component {
     let pomodoros = this.state.pomodoros;
     let edit = 1000000;
     for(let i =0; i < pomodoros.length; i++){
-      if(pomodoros[i].key == key){
+      if(pomodoros[i].key === key){
         edit = i;
       }
     }
@@ -137,11 +137,11 @@ class Cabinet extends Component {
 }
 
 const weekDay = [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ];
-const monthName = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
+const monthName = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 
 function dateHandler(cd, pd){
   let currDate = new Date(cd);
-  if(pd == null ){
+  if(pd === null ){
     let today = new Date();
     if(currDate.getDate() === today.getDate() && currDate.getMonth() === today.getMonth() && currDate.getFullYear() === today.getFullYear()){
       return "Today"
@@ -152,7 +152,7 @@ function dateHandler(cd, pd){
   }
   let prevDate = new Date(pd);
 
-  if(currDate.getDate() != prevDate.getDate()){
+  if(currDate.getDate() !== prevDate.getDate()){
     return getDateName(prevDate);
   }else{
     return null
