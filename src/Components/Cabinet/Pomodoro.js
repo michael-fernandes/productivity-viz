@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-
-import Cookies from 'universal-cookie';
+import { connect } from "react-redux";
 import PomodoroViz from './PomodoroViz';
 import InputDistraction from "./InputDistraction"
-
+import { hideFocus } from "../../ReduxActions/FocusActions"
 
 class Pomodoro extends Component {
   constructor(props){
@@ -13,7 +12,8 @@ class Pomodoro extends Component {
   }
 
   deletePomodoro(){
-    this.props.deletePomodoro(this.props.timeKey);
+    console.log(this.props.timeKey)
+    this.props.hideFocus('username', this.props.timeKey)
   }
 
   render() {
@@ -28,19 +28,14 @@ class Pomodoro extends Component {
       timeKey, 
       onSelect 
     } = this.props;
-    
-    console.log(distraction)
+
     return (
-        <div className="Pomodoro" >
-          { dateTag ?
-            <div className="dateDivider">
-              { dateTag }
-            </div>
+        <div className="Pomodoro" key={timeKey}>
+          { dateTag 
+          ? <div className="dateDivider"> { dateTag }</div>
           : null }
           <div className="pomdoroContainer">
-            <div className="remove"
-              onClick={this.deletePomodoro}
-            >
+            <div className="remove" onClick={this.deletePomodoro} >
               x
             </div>
             <InputDistraction 
@@ -48,9 +43,7 @@ class Pomodoro extends Component {
               distraction={distraction}
               selectionMade={selectionMade}
               timeKey={timeKey}
-              onSelect={onSelect}
-              />
-
+              onSelect={onSelect} />
           </div>
 
           <div>
@@ -58,12 +51,18 @@ class Pomodoro extends Component {
               percentComplete={percentComplete}
               mins={mins}
               isComplete={isComplete}
-              date={date}
-            />
+              date={date} />
           </div>
         </div>
     );
   }
 }
 
+const mapDispatchToProps = (dispatch) => {
+  return{
+    hideFocus: (username, key) =>  dispatch(hideFocus(username, key))
+  }
+}
+
+Pomodoro = connect(null, mapDispatchToProps)(Pomodoro)
 export default Pomodoro;

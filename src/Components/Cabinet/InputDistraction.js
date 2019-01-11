@@ -65,24 +65,29 @@ export default class InputDistraction extends Component {
       <div>
           { !isComplete ?
               <div className="datetime reasonText">
-              {formatDateTime(new Date( date ))} 
-              <div className="DistractionType">
-                { selected  !== 'Other' && distraction !== "Other"
-                ?   <select className={distractionStyle}
-                            onChange={this.selectionMade}>
-                        { options.map( (item, index) => this.selectOption(item, distraction, index)) }
-                    </select>
-                : <div>
-                    <input type="text" onChange={this.inputChange}/> 
-                       <button onClick={this.saveOption}>
-                          Save
-                       </button>
-                       <button onClick={this.cancelOption}>
-                         Cancel
-                       </button>
+
+                <div className="focusTimeComplete"> 
+                  {formatDateTime(new Date( date ))} 
+                </div>
+                
+                <div className="DistractionType">
+                  { selected  !== 'Other' && distraction !== "Other"
+                  ?   <div> <select className={distractionStyle}
+                              onChange={this.selectionMade}>
+                          { options.map( (item, index) => this.selectOption(item, distraction, index)) }
+                      </select>
                     </div>
-                }
-              </div>
+                  : <div>
+                      <input type="text" onChange={this.inputChange}/> 
+                        <button onClick={this.saveOption}>
+                            Save
+                        </button>
+                        <button onClick={this.cancelOption}>
+                          Cancel
+                        </button>
+                      </div>
+                  }
+                </div>
               </div>
             : null}
         

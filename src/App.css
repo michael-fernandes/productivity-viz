@@ -227,11 +227,14 @@ select{
 .datetime{
   display: inline-block;
   font-size: 90%;
-  max-width: 100px;
-  min-width: 70px;
   line-height: 100%;
   text-overflow: hidden;
   white-space: nowrap;
+}
+
+.focusTimeComplete{
+  width: 62.5px;
+  display: inline-block;
 }
 
 .reasonText{

@@ -3,7 +3,11 @@ import Cookies from 'universal-cookie';
 
 import Clock from './Components/Clock/Clock';
 import Cabinet from './Components/Cabinet/Cabinet';
+import Login from "./Components/Login/Login"
+
 import './App.css';
+import { connect } from "react-redux";
+
 
 const cookie = new Cookies();
 
@@ -23,10 +27,12 @@ class App extends Component {
     super(props);
 
     this.state = {
-        pomodoros:[]
+        pomodoros:[],
+        login: true
     }
 
     this.storePomodoro = this.storePomodoro.bind(this);
+    this.getAllUserFocus = this.getAllUserFocus.bind(this);
   }
 
   storePomodoro(stats){
@@ -35,6 +41,11 @@ class App extends Component {
     addPomodoroCookie(stats);
     this.setState({ pomodoros: pomodoros })
   }
+
+  getAllUserFocus(){
+    this.props.getAllUserFocus('username')
+  }
+
   componentDidMount(){
     document.title = "Productivity Viz"
   }
@@ -42,15 +53,26 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Clock 
-          storePomodoro={this.storePomodoro}
-        />
-        <Cabinet 
-          pomodoros={this.state.pomodoros}
-        />
+        { !this.state.login ? <Login />
+        :<div> 
+          <Clock storePomodoro={this.storePomodoro} />
+          <Cabinet pomodoros={this.state.pomodoros} /> 
+        </div> }
       </div>
     );
   }
 }
 
+const mapDispatchToProps = (dispatch) => {
+  return {
+  }
+}
+
+const mapStateToProps = (state) => {
+  return{
+
+  }
+}
+
+App = connect(mapStateToProps, mapDispatchToProps)(App);
 export default App;

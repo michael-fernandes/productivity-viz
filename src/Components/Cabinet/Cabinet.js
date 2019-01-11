@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import Cookies from 'universal-cookie';
+import { connect } from 'react-redux'
+import { userCheck } from '../../ReduxActions/FocusActions'
 
 //import { formatDate } from '../../Assets/Time';
 import Pomodoro from "./Pomodoro";
@@ -39,6 +41,7 @@ class Cabinet extends Component {
   } 
   
   componentWillMount(){
+    this.props.userCheck('username');
     let pomodoros = this.getPomodoros();
     this.countPomodoros(pomodoros);
   }
@@ -78,7 +81,6 @@ class Cabinet extends Component {
 
   deletePomodoro(key){
     let pomodoros = this.state.pomodoros;
-    let remove = 1000000;
     for(let i =0; i < pomodoros.length; i++){
       if(pomodoros[i].key === key){
         remove = i;
@@ -112,23 +114,21 @@ class Cabinet extends Component {
                 incomplete={this.state.incomplete}
             />
             <div>
-              {this.state.pomodoros.map( (item, index) =>
-                <div key={item.key}> 
-                  <div>
-                        <Pomodoro
-                            dateTag={item.dateTag}
-                            percentComplete={item.percentComplete}
-                            mins={item.mins}
-                            isComplete={item.isComplete}
-                            date={item.date}
-                            deletePomodoro={this.deletePomodoro}
-                            timeKey={item.key}
-                            reason={item.reason}
-                            distraction={item.distraction}
-                            onSelect={this.editPomodoro}
-                        />
-                  </div>
-                </div>
+              {this.props.focuses.map( (item, index) => { 
+                  if(!item.hidden){
+                    return( <div key={index}>
+                      <Pomodoro dateTag={item.dateTag}
+                          percentComplete={item.percentComplete}
+                          mins={item.mins}
+                          isComplete={item.isComplete}
+                          date={item.date}
+                          timeKey={item.key}
+                          reason={item.reason}
+                          distraction={item.distraction}
+                          onSelect={this.editPomodoro} />
+                    </div>)
+                  }
+                }
               )}
           </div>
       </div>
@@ -163,4 +163,17 @@ function getDateName(d){
   let date = new Date(d);
   return weekDay[date.getDay()] + ", " + monthName[date.getMonth()] + " " + date.getDate();
 }
-export default Cabinet;
+
+const mapStateToProps = (state) =>{
+  return {
+      focuses : state.focusHandler.focus
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+      userCheck: (userName) => dispatch( userCheck(userName) )
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Cabinet);

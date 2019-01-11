@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import Timer from './Timer';
-import Cookies from 'universal-cookie';
 import Title from "../Title/Title";
-
+import { connect } from 'react-redux'
 import { getMinute, getSeconds } from '../../Assets/Time';
+import { storeFocusHelper, userCheck } from '../../ReduxActions/FocusActions'
 
 const pomodoroSeconds = 60*25;
 const breakSeconds = 60*5;
@@ -26,9 +26,13 @@ class Clock extends Component{
         this.switchBreak = this.switchBreak.bind(this);
         this.startPomodoro = this.startPomodoro.bind(this);        
         this.pause = this.pause.bind(this);
-        this.getPomodoroStats = this.getPomodoroStats.bind(this);
+        this.getIntervalStats = this.getIntervalStats.bind(this);
         this.storePomodoro = this.storePomodoro.bind(this);
         this.updateReason = this.updateReason.bind(this);
+    }
+
+    componentWillMount(){
+        this.props.userCheck('username');
     }
 
     switchBreak(){
@@ -41,34 +45,17 @@ class Clock extends Component{
     }
 
     reset(){
+        console.log('reset called')
         if(this.state.time !== pomodoroSeconds ){
             if(this.state.isPomodoro){
                 this.storePomodoro();
             }
-            console.log("and this too?");
             this.setState({ time:pomodoroSeconds, isPomodoro:true});
         }else{
-            console.log("time check not false");
             this.startInterval();
         }
     }
-    
-    getPomodoroStats(){
-        let isComplete = (pomodoroSeconds - this.state.time === pomodoroSeconds);
-        var date = new Date()
 
-        let stats = {
-                percentComplete:(pomodoroSeconds - this.state.time) / pomodoroSeconds,
-                mins:getMinute(pomodoroSeconds - this.state.time),
-                isComplete:isComplete,
-                date:date,
-                key:date.getTime(),
-                reason:this.state.reason,
-                distraction:""
-            }
-        return stats
-    }
-    
     pause(timeReset = {}){
         if(!this.state.isPaused){
            this.timerManager(); //immediately respond to mouse click
@@ -79,9 +66,11 @@ class Clock extends Component{
         }                
     }
 
-    storePomodoro(){
-        let stats = this.getPomodoroStats();
-        this.props.storePomodoro(stats);
+    //BreakParams optional
+    startInterval(timerParams = {}){
+        let intervalId = setInterval(this.timerManager, 1000);
+        let timeOutDict = {intervalId:intervalId}
+        this.setState({ ...timeOutDict, ...timerParams, ...{isPaused:false} })
     }
 
     timerManager(){ 
@@ -99,22 +88,32 @@ class Clock extends Component{
         }  
     }
 
-    //BreakParams optional
-    startInterval(timerParams = {}){
-        let intervalId = setInterval(this.timerManager, 1000);
-        let timeOutDict = {intervalId:intervalId}
-        this.setState({ ...timeOutDict, ...timerParams, ...{isPaused:false} })
+    getIntervalStats(){
+        const isCompleteInterval = (pomodoroSeconds - this.state.time === pomodoroSeconds);
+        const date = new Date()
+
+        const focusStats = {
+                key:date.getTime(),
+                percentComplete:(pomodoroSeconds - this.state.time) / pomodoroSeconds,
+                mins:getMinute(pomodoroSeconds - this.state.time),
+                isComplete:isCompleteInterval,
+                date:date,
+                reason:this.state.reason,
+                distraction:"",
+                hidden: false,
+            }
+        this.props.storeFocusHelper(focusStats, 'username');
+        return focusStats
     }
 
-    componentDidMount(){
-        //this.startInterval();
-        return null;
+    storePomodoro(){
+        const stats = this.getIntervalStats();
+        //this.props.storePomodoro(stats);
     }
 
     updateReason(event){
-        console.log('we are in update reason but crassshing');
         this.setState({[event.target.name]:event.target.value})
-      }
+    }
 
     render(){
         document.title = getMinute(this.state.time) + ":" + getSeconds(this.state.time); //Not a fan of this being here.
@@ -129,4 +128,11 @@ class Clock extends Component{
     }
 }
 
-export default Clock;
+const mapDispatchToProps = (dispatch) => {
+    return {
+        userCheck: (userName) => dispatch( userCheck(userName) ),
+        storeFocusHelper: (focus, userName) => dispatch( storeFocusHelper(focus, userName) ),
+    };
+}
+
+export default connect(null, mapDispatchToProps)(Clock);
