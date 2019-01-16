@@ -3,7 +3,7 @@ import InfoIcon from "./InfoIcon"
 import Overlay from "./Overlay"
 
 // for info toggle
-const Info = () => { return <div className="info">more info</div>}
+// const Info = () => { return <div className="info">more info</div>}
 
 class Title extends Component {
   constructor(props){

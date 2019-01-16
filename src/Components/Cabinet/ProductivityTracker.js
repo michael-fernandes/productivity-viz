@@ -1,13 +1,34 @@
 import React, { Component } from 'react';
-
+import Refresh from './Refresh'
 //import { formatDateTime } from '../../Assets/Time';
 
 class ProductivtyTracker extends Component {
+  constructor(props){
+    super();
+
+    this.update = this.update.bind(this);
+    this.generateReport = this.generateReport.bind(this)
+  }
+
+  update(){
+    this.props.update(this.props.userName)
+  }
+  
+  generateReport(){
+    this.props.distractionCount(this.props.focuses)
+  }
+
   render() {
     return (
         <div className="ProductivityTracker">
           <div className="ProductivityTitle">
             Overall Stats
+            <div className="refreshButton" onClick={this.update}>
+              <Refresh />
+            </div>
+          </div>
+          <div className="report" onClick={this.generateReport}>
+            Generate Report
           </div>
           <div className="productivityStats">
             <div className="total">

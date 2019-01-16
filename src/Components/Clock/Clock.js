@@ -32,7 +32,7 @@ class Clock extends Component{
     }
 
     componentWillMount(){
-        this.props.userCheck('username');
+        this.props.userCheck('username', true);
     }
 
     switchBreak(){
@@ -91,7 +91,8 @@ class Clock extends Component{
     getIntervalStats(){
         const isCompleteInterval = (pomodoroSeconds - this.state.time === pomodoroSeconds);
         const date = new Date()
-
+        let distraction;
+        (isCompleteInterval) ? distraction = "complete" : distraction= " ";
         const focusStats = {
                 key:date.getTime(),
                 percentComplete:(pomodoroSeconds - this.state.time) / pomodoroSeconds,
@@ -99,16 +100,14 @@ class Clock extends Component{
                 isComplete:isCompleteInterval,
                 date:date,
                 reason:this.state.reason,
-                distraction:"",
+                distraction:distraction,
                 hidden: false,
             }
         this.props.storeFocusHelper(focusStats, 'username');
-        return focusStats
     }
 
     storePomodoro(){
-        const stats = this.getIntervalStats();
-        //this.props.storePomodoro(stats);
+        this.getIntervalStats();
     }
 
     updateReason(event){

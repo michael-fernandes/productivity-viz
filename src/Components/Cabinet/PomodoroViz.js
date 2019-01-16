@@ -24,8 +24,8 @@ class PomodoroViz extends Component {
     let { width } = this.props.size;
     var fauxSvg = ReactFauxDOM.createElement('div');  
     
-    var toolTip = d3.select(".tool").append("div")	
-                          .attr("class", "tooltip")	
+    // var toolTip = d3.select(".tool").append("div")	
+    //                       .attr("class", "tooltip")	
 
     let svg = d3.select(fauxSvg).append("svg")
                               .attr('margin', 0)
@@ -86,37 +86,4 @@ class PomodoroViz extends Component {
   }
 }
 
-//Leaving this function here, this is best practice but won't pick up differences in faux dom
-function componentWillMount_OLD(){
-    let { width, height } = this.props.size
-    let faux = this.props.connectFauxDOM('div', 'chart')
-    //var node = ReactFauxDOM.createElement('svg');
-    let svg = d3.select(faux).append("svg")
-                                  .attr('margin', 0)
-                                  .attr('padding', 0)
-                                  .attr('width', width)
-                                  .attr('height', barHeight);
-                              
-    svg.append("rect")
-          .attr("x", 0)
-          .attr("y", 0)
-          .attr("width", width)
-          .attr("height", barHeight)
-          .attr("fill", "#f2f2f2");
-    
-    svg.append("rect")
-          .attr("x", 0)
-          .attr("y", 0)
-          .attr("width", width * this.props.percentComplete)
-          .attr("height", barHeight)
-          .attr("fill", isCompleteColor(this.props.isComplete));
-    
-    svg.append('text')
-          .attr("x", 10)
-          .attr("y", 10)
-          .text(function(d) { return "charge"; })
-          .attr("fill", "white");
-  }
-
-
-  export default withSize()(ReactFauxDOM.withFauxDOM(PomodoroViz));
+export default withSize()(ReactFauxDOM.withFauxDOM(PomodoroViz));

@@ -12,7 +12,6 @@ class Pomodoro extends Component {
   }
 
   deletePomodoro(){
-    console.log(this.props.timeKey)
     this.props.hideFocus('username', this.props.timeKey)
   }
 
@@ -26,7 +25,8 @@ class Pomodoro extends Component {
       date, 
       selectionMade, 
       timeKey, 
-      onSelect 
+      onSelect,
+      options
     } = this.props;
 
     return (
@@ -43,7 +43,8 @@ class Pomodoro extends Component {
               distraction={distraction}
               selectionMade={selectionMade}
               timeKey={timeKey}
-              onSelect={onSelect} />
+              onSelect={onSelect}
+              options={options} />
           </div>
 
           <div>

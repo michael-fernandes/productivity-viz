@@ -1,178 +1,95 @@
 import React, { Component } from 'react';
-import Cookies from 'universal-cookie';
 import { connect } from 'react-redux'
-import { userCheck } from '../../ReduxActions/FocusActions'
+import { userCheck, updateDistraction } from '../../ReduxActions/FocusActions'
+import { distractionCount } from '../../ReduxActions/VisualizationActions'
 
+import ReactLoading from 'react-loading';
+ 
 //import { formatDate } from '../../Assets/Time';
 import Pomodoro from "./Pomodoro";
 import ProductivityTracker from "./ProductivityTracker"
 
-const cookies = new Cookies();
-
-function getCookie(){
-  //force clear cookies
-  //cookies.set("poms", [],{ path: '/' });
-  if(cookies.get('poms') === undefined){
-    return [];
-  }
-  return cookies.get('poms');
-}
-
 class Cabinet extends Component {
   constructor(props){
     super(props);
-
-    this.state = {
-      pomodoros:this.getPomodoros(),
-      incomplete:0,
-      complete:0
-    }
     
-    this.deletePomodoro = this.deletePomodoro.bind(this);
-    this.updatePomodoros = this.updatePomodoros.bind(this);
-    this.getPomodoros = this.getPomodoros.bind(this);
-    this.countPomodoros = this.countPomodoros.bind(this);
     this.editPomodoro = this.editPomodoro.bind(this);
-  }
-
-  componentWillReceiveProps(){
-    let pomodoros = this.getPomodoros();
-    this.countPomodoros(pomodoros);
-  } 
-  
-  componentWillMount(){
-    this.props.userCheck('username');
-    let pomodoros = this.getPomodoros();
-    this.countPomodoros(pomodoros);
-  }
-
-  getPomodoros(){
-    let pomodoros = this.props.pomodoros;
-    if(pomodoros == null){
-      pomodoros = getCookie();
-    }else{
-      pomodoros = [...pomodoros, ...getCookie()];
-    }
-    return getCookie();
-  }
-
-  updatePomodoros(){
-    this.setState({pomodoros:this.getPomodoroHelper()});
-  }
-
-  countPomodoros(pomodoros){
-    let complete = 0; 
-    let incomplete = 0;
-    let prevDate = null;
-    pomodoros.map((pomodoro, index) => {
-      if(pomodoro.isComplete){
-          complete += 1;  
-      }else{
-        incomplete += 1;
-      }
-
-      pomodoro.dateTag = dateHandler(pomodoro.date, prevDate);
-      
-      prevDate = pomodoro.date;
-    })
-    
-    this.setState({ complete:complete, incomplete:incomplete, pomodoros:pomodoros});
-  }
-
-  deletePomodoro(key){
-    let pomodoros = this.state.pomodoros;
-    for(let i =0; i < pomodoros.length; i++){
-      if(pomodoros[i].key === key){
-        remove = i;
-      }
-    }
-    pomodoros.splice(remove, 1);
-
-    cookies.set("poms", pomodoros,{ path: '/' });
-    this.countPomodoros(pomodoros);
-  }
+  }  
 
   editPomodoro(key, distraction){
-    let pomodoros = this.state.pomodoros;
-    let edit = 1000000;
-    for(let i =0; i < pomodoros.length; i++){
-      if(pomodoros[i].key === key){
-        edit = i;
-      }
+    console.log(key, distraction)
+    if(distraction !== "other"){
+      this.props.updateDistraction("username", key, distraction);
     }
-    pomodoros[edit].distraction = distraction;
-
-    cookies.set("poms", pomodoros,{ path: '/' });
-    this.countPomodoros(pomodoros);
   }
 
   render() {
+    let complete, incomplete;
+    if(this.props.counts !== undefined){
+      complete = this.props.counts.complete;
+      incomplete = this.props.counts.incomplete; 
+    } else {
+      complete = 0;
+      incomplete = 0;
+    }
+    console.log(incomplete);
     return (
         <div className="Cabinet">
             <ProductivityTracker 
-                complete={this.state.complete}
-                incomplete={this.state.incomplete}
-            />
-            <div>
-              {this.props.focuses.map( (item, index) => { 
-                  if(!item.hidden){
-                    return( <div key={index}>
-                      <Pomodoro dateTag={item.dateTag}
-                          percentComplete={item.percentComplete}
-                          mins={item.mins}
-                          isComplete={item.isComplete}
-                          date={item.date}
-                          timeKey={item.key}
-                          reason={item.reason}
-                          distraction={item.distraction}
-                          onSelect={this.editPomodoro} />
-                    </div>)
+              complete={complete}
+              incomplete={incomplete}
+              userName={'username'}
+              update={this.props.userCheck}
+              distractionCount={this.props.distractionCount}
+              focuses={this.props.focuses}
+            /> 
+            {this.props.isSearching
+              ?
+              <a className="isSearching-wrapper">
+                <ReactLoading name={'isSearching'} type={'SpinningBubbles'} color={'black'} height={'40px'} width={'40px'} />
+              </a>
+            : <div>
+                { this.props.focuses.map( (item, index) => { 
+                    if(!item.hidden){
+                      return( <div key={index}>
+                        <Pomodoro dateTag={item.dateTag}
+                            percentComplete={item.percentComplete}
+                            mins={item.mins}
+                            isComplete={item.isComplete}
+                            date={item.date}
+                            timeKey={item.key}
+                            reason={item.reason}
+                            distraction={item.distraction}
+                            onSelect={this.editPomodoro}
+                            options={this.props.options} />
+                      </div>)
+                    } else{
+                      return null
+                    }
                   }
-                }
-              )}
-          </div>
+                )}
+              </div>
+            }
       </div>
     );
   }
 }
 
-const weekDay = [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ];
-const monthName = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
-
-function dateHandler(cd, pd){
-  let currDate = new Date(cd);
-  if(pd === null ){
-    let today = new Date();
-    if(currDate.getDate() === today.getDate() && currDate.getMonth() === today.getMonth() && currDate.getFullYear() === today.getFullYear()){
-      return "Today"
-    }
-    else {
-      return getDateName(currDate);
-    }
-  }
-  let prevDate = new Date(pd);
-
-  if(currDate.getDate() !== prevDate.getDate()){
-    return getDateName(prevDate);
-  }else{
-    return null
-  }
-}
-
-function getDateName(d){
-  let date = new Date(d);
-  return weekDay[date.getDay()] + ", " + monthName[date.getMonth()] + " " + date.getDate();
-}
-
 const mapStateToProps = (state) =>{
   return {
-      focuses : state.focusHandler.focus
+      focuses: state.focusHandler.focus,
+      counts: state.focusHandler.counts,
+      isSearching: state.focusHandler.isSearching,
+      options: state.focusHandler.options,
+      userName: state.focusHandler.user
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-      userCheck: (userName) => dispatch( userCheck(userName) )
+      userCheck: (userName) => dispatch( userCheck(userName) ),
+      updateDistraction: (userName, key, distraction) => dispatch(updateDistraction(userName, key, distraction)),
+      distractionCount: (focuses) => dispatch(distractionCount(focuses)),
   };
 }
 

@@ -8,7 +8,8 @@ exports.user = {
   admin: false,
   focus: {},
   created_at: new Date(),
-  updated_at: new Date()
+  updated_at: new Date(),
+  options:["unknown", "Social Media", "Phone", "Unexpected Event", "Other"],
 }
 
 

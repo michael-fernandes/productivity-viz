@@ -6,7 +6,7 @@ import Reset from "./ButtonImages/Reset";
 import Break from "./ButtonImages/Break";
 import Play from "./ButtonImages/Play";
 
-import { getMinute, getSeconds, singleDigitSeconds } from '../../Assets/Time';
+import { getMinute, getSeconds } from '../../Assets/Time';
 
 const bttnNames = ["Start / Pause", "Reset",  "Break", "Focus"];
 

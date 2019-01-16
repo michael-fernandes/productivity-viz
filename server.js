@@ -26,7 +26,7 @@ app.get('/', function (req, res) {
 app.get('/userCheck/:userId', function (req, res){
   console.log('userLookup')
   let userName = req.params.userId;
-  MongoClient.connect(mongoDB, (err, client) => {
+  MongoClient.connect(mongoDB, { useNewUrlParser: true }, (err, client) => {
     if (err) return console.log(err)
     db = client.db('productivityvis')
     db.collection('user-data')
@@ -51,12 +51,7 @@ app.post('/saveFocus/:userId', function (req, res) {
   try {
     callLookUpPromiseSave( userName, focus)
       .then( function(result){
-        //const focus = result.user.focus;
-        //let resultUpdate = result;
-        //resultUpdate.user.focus.push({'random':'save'});
-        // saveFocus(client, resultUpdate, userName)
-      }).then(function(result) {
-        client.close();
+        console.log("send")
         res.send("sucess");
       })
   } catch(e) {
@@ -65,7 +60,7 @@ app.post('/saveFocus/:userId', function (req, res) {
 })
 
 // creates await for lookup
-const callLookUpPromiseSave = async (client, name, focus) => {
+const callLookUpPromiseSave = async (name, focus) => {
   lookupPromiseSave( name, focus) 
   // let result = await ( lookupPromiseSave(client, name, focus) );
   // return ( result );
@@ -73,7 +68,7 @@ const callLookUpPromiseSave = async (client, name, focus) => {
 
 // to lookup
 const lookupPromiseSave = (userName, focus) => {
-  console.log('lookupPromise ', userName)
+  console.log('lookupPromise ', focus.key)
   let lookupKey = 'user.focus.' + focus.key 
   console.log(lookupKey)
   MongoClient.connect(mongoDB, { useNewUrlParser: true },  (err, client) => {
@@ -85,34 +80,9 @@ const lookupPromiseSave = (userName, focus) => {
                           (err)
                             ? console.log(err)
                             : console.log(result[0]) })
+      
   })
 }
-
-const saveFocus = async (client, userData, username) => {
-  console.log(userData)
-  client.db('productivityvis')
-        .collection('user-data')
-        .updateOne( { 'user.username': username},{ $set: {"12121":userData}})
-        //update one needs to be double checked, 
-  return ( true );
-}
-
-//add hide pomodoro later once we have the rest of the system rigged up
-app.get('/hideFocus/:userName/:pomId', function(req, res){
-  console.log('hiding pomodoro')
-  const pomId = req.params.pomId;
-  const lookupHidden = 'user.focus.' + pomId + '.hidden';
-  console.log([lookupKey]);
-  const userName = req.params.userName;
-
-  MongoClient.connect(mongoDB, { useNewUrlParser: true }, (err, client) => {
-    console.log('we in this bitch')
-    db = client.db('productivityvis')
-    db.collection('user-data')
-      .update( { 'user.username': 'username'}, 
-              {'$set' : { [lookupHidden]: 'true' }});
-  })
-})
 
 //add user if necessary
 app.get('/addUser/:userId', function (req, res){
@@ -134,13 +104,58 @@ const insertNew = (username, res) =>{
   try{
     MongoClient.connect(mongoDB, { useNewUrlParser: true },  (err, client) => {
       console.log('in this')
-        client.db('productivityvis')
-              .collection('user-data')
-              .insertOne({_id:username, user:userScheme.user});
+      client.db('productivityvis')
+            .collection('user-data')
+            .insertOne({_id:username, user:userScheme.user});
+
     })
   }catch(err){
     console.log('insert err', err);
   }
  }
+
+ //add hide pomodoro later once we have the rest of the system rigged up
+app.get('/hideFocus/:userName/:pomId', function(req, res){
+  console.log('hiding pomodoro')
+  const pomId = req.params.pomId;
+  const lookupHidden = 'user.focus.' + pomId + '.hidden';
+  const userName = req.params.userName;
+  MongoClient.connect(mongoDB, { useNewUrlParser: true }, (err, client) => {
+    db = client.db('productivityvis')
+    db.collection('user-data')
+      .updateOne( {_id: 'username'}, 
+                  { '$set' : { [lookupHidden]: true }});
+    
+  })
+  res.send("sucess")
+})
+
+ app.get('/updateDistraction/:userName/:pomId/:distraction', function(req, res){
+  console.log('updating pomodoro')
+  const { pomId, distraction, userName } = req.params;
+  const lookupDistraction = 'user.focus.' + pomId + '.distraction';
+  console.log(lookupDistraction);
+  MongoClient.connect(mongoDB, { useNewUrlParser: true }, (err, client) => {
+    db = client.db('productivityvis')
+    db.collection('user-data')
+      .updateOne( {_id: 'username'}, 
+                  { '$set' : { [lookupDistraction]: distraction }});
+    
+  })
+  res.send("sucess")
+})
+
+app.get('/updateDistraction/:username/:option', function(req, res){
+  console.log('new option')
+  const { username, option } = req.params;
+  MongoClient.connect(mongoDB, { useNewUrlParser: true }, (err, client) => {
+    db = client.db('productivityvis')
+    db.collection('user-data')
+      .updateOne( {_id: username}, 
+                  { '$push' : { 'user.options': option }});
+    
+  })
+  res.send("sucess")
+})
 
 app.listen( port, () => console.log(`Listening on port ${port}`) )

@@ -19,6 +19,14 @@
 
 }
 
+.isSearching-wrapper{
+  width: 100%;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .Clock{
   display: inline-block;
   width: 70%;
@@ -288,4 +296,34 @@ div.tooltip {
     border: 0px;		
     border-radius: 4px;			
     pointer-events: none;			
+}
+
+.refreshButton {
+  display: inline-block;
+  float: right;
+}
+
+.refreshButton>svg{
+  fill: grey;
+}
+
+.refreshButton>svg:hover{
+  fill: black;
+  cursor: pointer;
+}
+
+.refreshButton:active > svg{
+  transform: rotate(-360deg);
+  transition: 0.25s;
+}
+
+
+.report{
+  font-size:0.9em;
+  color: #164a61;
+}
+
+.report:hover{
+  cursor:pointer;
+  font-weight:500;
 }

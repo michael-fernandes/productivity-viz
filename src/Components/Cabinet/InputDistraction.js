@@ -1,18 +1,17 @@
 import React, { Component } from 'react'
 import { formatDateTime } from '../../Assets/Time'
+import {connect} from 'react-redux'
+import { createNewOption } from '../../ReduxActions/FocusActions';
 
-export default class InputDistraction extends Component {
+class InputDistraction extends Component {
   constructor(props){
       super(props);
 
       this.state = {
           selected : null,
-          options : [null, "Social Media", "Phone", "Unexpected Event", "Other"],
           newOption: null
-
       }
 
-      this.selectOption = this.selectOption.bind(this)
       this.selectionMade = this.selectionMade.bind(this)
       this.saveOption = this.saveOption.bind(this)
       this.cancelOption = this.cancelOption.bind(this)
@@ -24,39 +23,37 @@ export default class InputDistraction extends Component {
   }
 
   saveOption( ){
-    this.selectionMade(null);
+    let input = this.state.newOption.trim();
+    if(this.props.options.indexOf(input) === -1){
+      this.props.createNewOption('username', input)
+      this.selectionMade(null, input)
+    }
   }
 
   cancelOption(){
     this.setState({selected:null, newOption:null})
   }
 
-  selectionMade(event, custom = ')'){
+  selectionMade(event, customInput = ')'){
     console.log(event);
-    let input;
+    let selected;
     if ( event === null){
-      input = custom;
+      selected = customInput;
     } else {
-      input = event.target.value
+      selected = event.target.value
     }
-    if(input !== 'Other'){
-      this.props.onSelect(this.props.timeKey, input);
-      this.setState({ selected: input})
-    } else if (event.target.value == "Other"){
+    if(selected !== 'Other'){
+      this.props.onSelect(this.props.timeKey, selected);
+      this.setState({ selected: selected})
+    } else if (event.target.value === "Other"){
       this.setState({selected: "Other"})
     }
   }
 
-  selectOption(select, active, index){
-    if(active === select){
-      return <option key={index} value={select} selected>{select}</option>
-    } return <option key={index} value={select}>{select}</option>
-  }
-
   render() {
     let distractionStyle;
-    const { selected, options } = this.state;
-    const { distraction, isComplete, date } = this.props
+    const { selected } = this.state;
+    const { distraction, isComplete, date, options } = this.props
 
     if(this.props.distraction){
       distractionStyle += " distractionSelected";
@@ -72,9 +69,13 @@ export default class InputDistraction extends Component {
                 
                 <div className="DistractionType">
                   { selected  !== 'Other' && distraction !== "Other"
-                  ?   <div> <select className={distractionStyle}
+                  ?<div> 
+                      <select className={distractionStyle} 
+                              value={this.props.distraction}
                               onChange={this.selectionMade}>
-                          { options.map( (item, index) => this.selectOption(item, distraction, index)) }
+
+                          { options.map( (item) => <option key={item} value={item}>{item}</option> )}
+
                       </select>
                     </div>
                   : <div>
@@ -95,3 +96,17 @@ export default class InputDistraction extends Component {
     )
   }
 }
+
+const mapPropsToState = (state) => {
+  return {
+    options: state.focusHandler.options
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+      createNewOption: (userName, option) => dispatch( createNewOption(userName, option) ),
+  };
+}
+
+export default connect(mapPropsToState, mapDispatchToProps)(InputDistraction);

@@ -1,37 +1,62 @@
-import { STORE_FOCUS,
-         STORE_USER_FOCUS } from "../ReduxActions/FocusActions"
+import { STORE_USER_FOCUS,
+         USER_SEARCH,
+         } from "../ReduxActions/FocusActions"
+
+import { DISTRACTION_COUNT } from "../ReduxActions/VisualizationActions"
 
 import { combineReducers } from "redux"
 
-const getFocusList = (actionFocus) =>{
-    if(actionFocus === undefined){
-        //if no action focuses yet
-        return [];
-    }
-    let focus = [];
-    let focuses = { ...actionFocus};
-    let keys = Object.keys(focuses);
-    for(let i = 0; i< keys.length; i++){
-        focus.push(focuses[keys[i]])
-    }
-    return focus
-}
+import CountFocuses from "./Helpers/CountFocuses"
+import GetFocusList from "./Helpers/GetFocusList"
+import CountDistractions from './Helpers/CountDistractions'
 
 const focusHandler = (state = {focus: {}}, action) => {
-    switch (action.type){
+    console.log("focus state ", state)
+    switch (action.type) {
         case STORE_USER_FOCUS:
-            let focus = getFocusList(action.focus);
-            return Object.assign({}, state,{
-                focus: focus
+            let focus = GetFocusList(action.focus);
+            let counts = CountFocuses(focus);
+            return Object.assign( {}, state, {
+                focus: focus,
+                counts: counts,
+                options: action.options,
+                user: action.user
+            })
+        case USER_SEARCH:
+            return Object.assign( {}, state, {
+                isSearching: action.isSearching
             })
         default: 
-            return Object.assign({}, state,{
-                focus: []
+            return Object.assign({}, state, {
+                focus: [], 
+                counts: {
+                    complete: 0, 
+                    incomplete: 0
+                },
+                isSearching: false,
+                isError: false,
             })
     }
 }
+
+const visualizationHandler = (state = {counts: {}}, action) =>{
+    console.log('vis hander',state);
+    switch (action.type){
+        case DISTRACTION_COUNT:
+            let counts = CountDistractions(action.focuses)
+            return Object.assign({}, state, {
+                counts: counts
+            })
+        default:
+            return Object.assign({}, state, {
+                counts: {}
+            })
+    }
+}
+
 const rootReducer = combineReducers({
-    focusHandler
+    focusHandler, 
+    visualizationHandler
 })  
 
 export default rootReducer

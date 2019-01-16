@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import InfoIcon from "./InfoIcon" 
+// import InfoIcon from "./InfoIcon" 
 
 class Overlay extends Component {
   constructor(props){
